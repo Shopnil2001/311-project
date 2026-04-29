@@ -17,6 +17,12 @@ $citizenCount = scalarQuery($mysqli, 'SELECT COUNT(DISTINCT citizens.id) AS tota
 $complaintCount = scalarQuery($mysqli, 'SELECT COUNT(*) AS total FROM complaints JOIN citizens ON complaints.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id WHERE sectors.mp_id = ?', 'i', [$mpId]);
 $crimeCount = scalarQuery($mysqli, 'SELECT COUNT(*) AS total FROM crime_reports JOIN citizens ON crime_reports.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id WHERE sectors.mp_id = ?', 'i', [$mpId]);
 $projectCount = scalarQuery($mysqli, 'SELECT COUNT(*) AS total FROM mp_projects WHERE mp_id = ?', 'i', [$mpId]);
+$suggestionCount = scalarQuery($mysqli, 'SELECT COUNT(*) AS total FROM suggestions JOIN citizens ON suggestions.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id WHERE sectors.mp_id = ?', 'i', [$mpId]);
+$reviewedCrimeCount = 0;
+$columnResult = $mysqli->query("SHOW COLUMNS FROM crime_reports LIKE 'is_reviewed'");
+if ($columnResult && $columnResult->num_rows > 0) {
+    $reviewedCrimeCount = scalarQuery($mysqli, 'SELECT COUNT(*) AS total FROM crime_reports JOIN citizens ON crime_reports.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id WHERE sectors.mp_id = ? AND crime_reports.is_reviewed = 1', 'i', [$mpId]);
+}
 
 $recentComplaints = [];
 $stmt = $mysqli->prepare('SELECT complaints.id, complaints.subject, complaint_status.name AS status_name, complaints.response, citizens.name AS citizen_name, complaints.created_at FROM complaints JOIN citizens ON complaints.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id LEFT JOIN complaint_status ON complaints.status_id = complaint_status.id WHERE sectors.mp_id = ? ORDER BY complaints.created_at DESC LIMIT 6');
@@ -36,13 +42,17 @@ $recentComplaints = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <li>Registered citizens: <?= $citizenCount ?></li>
             <li>Complaints submitted: <?= $complaintCount ?></li>
             <li>Crime reports: <?= $crimeCount ?></li>
+            <li>Reviewed crime reports: <?= $reviewedCrimeCount ?></li>
+            <li>Suggestions submitted: <?= $suggestionCount ?></li>
             <li>Projects published: <?= $projectCount ?></li>
         </ul>
     </div>
     <div class="card">
         <h2>Quick actions</h2>
         <p><a class="button" href="manage_complaints.php">Review Complaints</a></p>
-        <p><a class="button" href="manage_projects.php">Add Projects</a></p>
+        <p><a class="button" href="manage_crime.php">Review Crime</a></p>
+        <p><a class="button" href="manage_suggestions.php">Review Suggestions</a></p>
+        <p><a class="button" href="manage_projects.php">Manage Projects</a></p>
     </div>
     <div class="card">
         <h2>Recent complaints</h2>

@@ -4,19 +4,32 @@ requireRole('mp');
 $mpId = $_SESSION['user']['id'];
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $complaintId = intval($_POST['complaint_id'] ?? 0);
-    $statusId = intval($_POST['status_id'] ?? 0);
-    $response = trim($_POST['response'] ?? '');
-    if ($complaintId > 0 && $statusId > 0) {
-        $update = $mysqli->prepare('UPDATE complaints SET status_id = ?, response = ? WHERE id = ?');
-        $update->bind_param('isi', $statusId, $response, $complaintId);
-        if ($update->execute()) {
-            header('Location: manage_complaints.php?updated=1');
-            exit;
+    if (isset($_POST['delete_complaint'])) {
+        $complaintId = intval($_POST['complaint_id'] ?? 0);
+        if ($complaintId > 0) {
+            $delete = $mysqli->prepare('DELETE FROM complaints WHERE id = ?');
+            $delete->bind_param('i', $complaintId);
+            if ($delete->execute()) {
+                header('Location: manage_complaints.php?deleted=1');
+                exit;
+            }
+            $error = 'Unable to delete complaint.';
         }
-        $error = 'Unable to update complaint status.';
     } else {
-        $error = 'Please choose a complaint and status.';
+        $complaintId = intval($_POST['complaint_id'] ?? 0);
+        $statusId = intval($_POST['status_id'] ?? 0);
+        $response = trim($_POST['response'] ?? '');
+        if ($complaintId > 0 && $statusId > 0) {
+            $update = $mysqli->prepare('UPDATE complaints SET status_id = ?, response = ? WHERE id = ?');
+            $update->bind_param('isi', $statusId, $response, $complaintId);
+            if ($update->execute()) {
+                header('Location: manage_complaints.php?updated=1');
+                exit;
+            }
+            $error = 'Unable to update complaint status.';
+        } else {
+            $error = 'Please choose a complaint and status.';
+        }
     }
 }
 $complaints = $mysqli->query("SELECT complaints.id, citizens.name AS citizen_name, complaint_categories.name AS category_name, complaints.subject, complaints.message, complaint_status.name AS status_name, complaints.response, complaints.created_at FROM complaints JOIN citizens ON complaints.citizen_id = citizens.id JOIN sectors ON citizens.sector_id = sectors.id LEFT JOIN complaint_categories ON complaints.category_id = complaint_categories.id LEFT JOIN complaint_status ON complaints.status_id = complaint_status.id WHERE sectors.mp_id = $mpId ORDER BY complaints.created_at DESC")->fetch_all(MYSQLI_ASSOC);
@@ -64,6 +77,7 @@ $statuses = $mysqli->query('SELECT id, name FROM complaint_status ORDER BY id')-
         <label for="response">Response message</label>
         <textarea id="response" name="response"></textarea>
         <button type="submit">Update Complaint</button>
+        <button type="submit" name="delete_complaint" value="1" style="margin-left:10px;background:#dc2626;">Delete Complaint</button>
     </form>
 </section>
 <?php include 'includes/footer.php'; ?>

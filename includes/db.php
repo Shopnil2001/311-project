@@ -26,9 +26,17 @@ function requireLogin()
 function requireRole($role)
 {
     requireLogin();
-    if (empty($_SESSION['user']) || $_SESSION['user']['role'] !== $role) {
-        header('Location: index.php');
-        exit;
+    $userRole = $_SESSION['user']['role'] ?? null;
+    if (is_array($role)) {
+        if (!in_array($userRole, $role, true)) {
+            header('Location: index.php');
+            exit;
+        }
+    } else {
+        if ($userRole !== $role) {
+            header('Location: index.php');
+            exit;
+        }
     }
 }
 ?>
