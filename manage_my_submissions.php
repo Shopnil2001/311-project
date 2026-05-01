@@ -139,91 +139,110 @@ $suggestions = $mysqli->query("SELECT id, title, description, created_at FROM su
 $reports = $mysqli->query("SELECT crime_reports.id, crime_categories.name AS category_name, crime_reports.description, crime_reports.is_anonymous, crime_reports.media_path, crime_reports.media_type, crime_reports.is_reviewed, crime_reports.created_at FROM crime_reports LEFT JOIN crime_categories ON crime_reports.category_id = crime_categories.id WHERE crime_reports.citizen_id = $citizenId ORDER BY crime_reports.created_at DESC")->fetch_all(MYSQLI_ASSOC);
 ?>
 <?php include 'includes/header.php'; ?>
-<section class="card">
-    <h1>My Submissions</h1>
-    <?php if ($success): ?><div class="alert" style="background:#d1fae5;color:#064e3b;"><?= htmlspecialchars($success) ?></div><?php endif; ?>
-    <?php if ($error): ?><div class="alert"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-</section>
-<?php if ($editMode === 'complaint' && $editItem): ?>
-<section class="card">
-    <h2>Edit Complaint</h2>
+
+<div class="back-btn-container">
+    <a href="dashboard_citizen.php" class="button outline back-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Back to Dashboard
+    </a>
+</div>
+
+<div class="mb-4">
+    <h1 class="section-title">My Submissions</h1>
+    <?php if ($success): ?><div class="alert success mb-4" style="background:#dcfce7; color:#15803d; border-color:#bbf7d0;"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="alert mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+</div>
+
+<?php if ($editMode && $editItem): ?>
+<div class="card mb-4" style="max-width: 700px; margin: 0 auto 60px;">
+    <h2 style="margin-bottom: 30px;">Edit <?= ucfirst($editMode) ?></h2>
     <form method="post" action="manage_my_submissions.php">
-        <input type="hidden" name="complaint_id" value="<?= htmlspecialchars($editItem['id']) ?>">
-        <label for="category_id">Complaint category</label>
-        <select id="category_id" name="category_id" required>
-            <option value="">Select category</option>
-            <?php foreach ($complaintCategories as $category): ?>
-                <option value="<?= $category['id'] ?>" <?= $category['id'] == $editItem['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['name']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <label for="subject">Subject</label>
-        <input type="text" id="subject" name="subject" required value="<?= htmlspecialchars($editItem['subject']) ?>">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" required><?= htmlspecialchars($editItem['message']) ?></textarea>
-        <label for="status_id">Status</label>
-        <select id="status_id" name="status_id" required>
-            <option value="">Choose status</option>
-            <?php foreach ($statuses as $status): ?>
-                <option value="<?= $status['id'] ?>" <?= $status['id'] == $editItem['status_id'] ? 'selected' : '' ?>><?= htmlspecialchars($status['name']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" name="update_complaint">Save Changes</button>
-        <a class="button" href="manage_my_submissions.php" style="background:#6b7280;">Cancel</a>
+        <?php if ($editMode === 'complaint'): ?>
+            <input type="hidden" name="complaint_id" value="<?= $editItem['id'] ?>">
+            <div class="form-group">
+                <label for="category_id">Category</label>
+                <select id="category_id" name="category_id" required>
+                    <?php foreach ($complaintCategories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>" <?= $cat['id'] == $editItem['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required value="<?= htmlspecialchars($editItem['subject']) ?>">
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" required><?= htmlspecialchars($editItem['message']) ?></textarea>
+            </div>
+            <div class="form-group">
+                <label for="status_id">Status</label>
+                <select id="status_id" name="status_id" required>
+                    <?php foreach ($statuses as $stat): ?>
+                        <option value="<?= $stat['id'] ?>" <?= $stat['id'] == $editItem['status_id'] ? 'selected' : '' ?>><?= htmlspecialchars($stat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button type="submit" name="update_complaint">Update Complaint</button>
+        <?php elseif ($editMode === 'suggestion'): ?>
+            <input type="hidden" name="suggestion_id" value="<?= $editItem['id'] ?>">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" required value="<?= htmlspecialchars($editItem['title']) ?>">
+            </div>
+            <div class="form-group">
+                <label for="description">Details</label>
+                <textarea id="description" name="description" rows="5" required><?= htmlspecialchars($editItem['description']) ?></textarea>
+            </div>
+            <button type="submit" name="update_suggestion">Update Suggestion</button>
+        <?php elseif ($editMode === 'report'): ?>
+            <input type="hidden" name="report_id" value="<?= $editItem['id'] ?>">
+            <div class="form-group">
+                <label for="category_id">Crime Category</label>
+                <select id="category_id" name="category_id" required>
+                    <?php foreach ($crimeCategories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>" <?= $cat['id'] == $editItem['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" required><?= htmlspecialchars($editItem['description']) ?></textarea>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" name="anonymous" value="1" <?= $editItem['is_anonymous'] ? 'checked' : '' ?> style="width: auto;">
+                <label style="margin: 0;">Submit anonymously</label>
+            </div>
+            <button type="submit" name="update_report">Update Report</button>
+        <?php endif; ?>
+        <a href="manage_my_submissions.php" class="button outline mt-2" style="width: 100%;">Cancel Edit</a>
     </form>
-</section>
-<?php elseif ($editMode === 'suggestion' && $editItem): ?>
-<section class="card">
-    <h2>Edit Suggestion</h2>
-    <form method="post" action="manage_my_submissions.php">
-        <input type="hidden" name="suggestion_id" value="<?= htmlspecialchars($editItem['id']) ?>">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" required value="<?= htmlspecialchars($editItem['title']) ?>">
-        <label for="description">Suggestion details</label>
-        <textarea id="description" name="description" required><?= htmlspecialchars($editItem['description']) ?></textarea>
-        <button type="submit" name="update_suggestion">Save Changes</button>
-        <a class="button" href="manage_my_submissions.php" style="background:#6b7280;">Cancel</a>
-    </form>
-</section>
-<?php elseif ($editMode === 'report' && $editItem): ?>
-<section class="card">
-    <h2>Edit Crime Report</h2>
-    <form method="post" action="manage_my_submissions.php">
-        <input type="hidden" name="report_id" value="<?= htmlspecialchars($editItem['id']) ?>">
-        <label for="category_id">Crime category</label>
-        <select id="category_id" name="category_id" required>
-            <option value="">Select category</option>
-            <?php foreach ($crimeCategories as $category): ?>
-                <option value="<?= $category['id'] ?>" <?= $category['id'] == $editItem['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['name']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <label for="description">Description</label>
-        <textarea id="description" name="description" required><?= htmlspecialchars($editItem['description']) ?></textarea>
-        <label><input type="checkbox" name="anonymous" value="1" <?= $editItem['is_anonymous'] ? 'checked' : '' ?>> Submit anonymously</label>
-        <button type="submit" name="update_report">Save Changes</button>
-        <a class="button" href="manage_my_submissions.php" style="background:#6b7280;">Cancel</a>
-    </form>
-</section>
+</div>
 <?php endif; ?>
-<section class="card">
-    <h2>My Complaints</h2>
+
+<div class="card mb-4">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-size: 1.5rem;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 12px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.4 8.38 8.38 0 0 1 3.9.9"></path><polyline points="16 2 16 6 20 6"></polyline><polyline points="12 14 22 4"></polyline></svg>My Complaints</h2>
+        <a href="submit_complaint.php" class="button" style="width: auto; padding: 10px 24px; font-size: 0.9rem;">+ New Complaint</a>
+    </div>
     <?php if ($complaints): ?>
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Subject</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                    <tr><th>Subject</th><th>Category</th><th>Status</th><th>Date</th><th style="text-align: right;">Actions</th></tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($complaints as $complaint): ?>
+                    <?php foreach ($complaints as $c): ?>
                         <tr>
-                            <td><?= htmlspecialchars($complaint['subject']) ?></td>
-                            <td><?= htmlspecialchars($complaint['category_name']) ?></td>
-                            <td><?= htmlspecialchars($complaint['status_name'] ?: 'New') ?></td>
-                            <td><?= htmlspecialchars($complaint['created_at']) ?></td>
-                            <td>
-                                <a class="button" href="manage_my_submissions.php?edit_type=complaint&id=<?= $complaint['id'] ?>">Edit</a>
-                                <form method="post" action="manage_my_submissions.php" style="display:inline-block; margin-left:8px;">
-                                    <input type="hidden" name="complaint_id" value="<?= $complaint['id'] ?>">
-                                    <button class="button" type="submit" name="delete_complaint" value="1" style="background:#dc2626;">Delete</button>
+                            <td style="font-weight: 700; color: var(--primary-dark);"><?= htmlspecialchars($c['subject']) ?></td>
+                            <td><span class="badge" style="background:#f1f5f9; color:#64748b;"><?= htmlspecialchars($c['category_name']) ?></span></td>
+                            <td><span class="badge <?= strtolower($c['status_name']) === 'resolved' ? 'success' : 'primary' ?>"><?= htmlspecialchars($c['status_name'] ?: 'New') ?></span></td>
+                            <td class="text-muted"><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
+                            <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="manage_my_submissions.php?edit_type=complaint&id=<?= $c['id'] ?>" class="button outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--border);">Edit</a>
+                                <form method="post" onsubmit="return confirm('Delete this complaint?');">
+                                    <input type="hidden" name="complaint_id" value="<?= $c['id'] ?>">
+                                    <button type="submit" name="delete_complaint" class="button" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); box-shadow: none;">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -232,27 +251,35 @@ $reports = $mysqli->query("SELECT crime_reports.id, crime_categories.name AS cat
             </table>
         </div>
     <?php else: ?>
-        <p>No complaints submitted yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <h3>No complaints filed</h3>
+            <p>You haven't submitted any complaints yet. Start by voicing your concerns.</p>
+        </div>
     <?php endif; ?>
-</section>
-<section class="card">
-    <h2>My Suggestions</h2>
+</div>
+
+<div class="card mb-4">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-size: 1.5rem;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 12px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>My Suggestions</h2>
+        <a href="submit_suggestion.php" class="button" style="width: auto; padding: 10px 24px; font-size: 0.9rem;">+ New Suggestion</a>
+    </div>
     <?php if ($suggestions): ?>
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Title</th><th>Date</th><th>Actions</th></tr>
+                    <tr><th>Title</th><th>Date</th><th style="text-align: right;">Actions</th></tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($suggestions as $suggestion): ?>
+                    <?php foreach ($suggestions as $s): ?>
                         <tr>
-                            <td><?= htmlspecialchars($suggestion['title']) ?></td>
-                            <td><?= htmlspecialchars($suggestion['created_at']) ?></td>
-                            <td>
-                                <a class="button" href="manage_my_submissions.php?edit_type=suggestion&id=<?= $suggestion['id'] ?>">Edit</a>
-                                <form method="post" action="manage_my_submissions.php" style="display:inline-block; margin-left:8px;">
-                                    <input type="hidden" name="suggestion_id" value="<?= $suggestion['id'] ?>">
-                                    <button class="button" type="submit" name="delete_suggestion" value="1" style="background:#dc2626;">Delete</button>
+                            <td style="font-weight: 700;"><?= htmlspecialchars($s['title']) ?></td>
+                            <td class="text-muted"><?= date('M d, Y', strtotime($s['created_at'])) ?></td>
+                            <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="manage_my_submissions.php?edit_type=suggestion&id=<?= $s['id'] ?>" class="button outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--border);">Edit</a>
+                                <form method="post" onsubmit="return confirm('Delete this suggestion?');">
+                                    <input type="hidden" name="suggestion_id" value="<?= $s['id'] ?>">
+                                    <button type="submit" name="delete_suggestion" class="button" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); box-shadow: none;">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -261,40 +288,36 @@ $reports = $mysqli->query("SELECT crime_reports.id, crime_categories.name AS cat
             </table>
         </div>
     <?php else: ?>
-        <p>No suggestions submitted yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h3>No suggestions found</h3>
+            <p>Your ideas can help improve our community. Submit your first suggestion today!</p>
+        </div>
     <?php endif; ?>
-</section>
-<section class="card">
-    <h2>My Crime Reports</h2>
+</div>
+
+<div class="card mb-4">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-size: 1.5rem;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 12px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Crime Reports</h2>
+        <a href="submit_crime.php" class="button" style="width: auto; padding: 10px 24px; font-size: 0.9rem; background: var(--accent);">+ Report Crime</a>
+    </div>
     <?php if ($reports): ?>
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Category</th><th>Description</th><th>Media</th><th>Reviewed</th><th>Date</th><th>Actions</th></tr>
+                    <tr><th>Category</th><th>Status</th><th>Date</th><th style="text-align: right;">Actions</th></tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($reports as $report): ?>
+                    <?php foreach ($reports as $r): ?>
                         <tr>
-                            <td><?= htmlspecialchars($report['category_name']) ?></td>
-                            <td><?= nl2br(htmlspecialchars($report['description'])) ?></td>
-                            <td>
-                                <?php if ($report['media_path']): ?>
-                                    <?php if ($report['media_type'] === 'video'): ?>
-                                        <video width="160" controls><source src="<?= htmlspecialchars($report['media_path']) ?>" type="video/mp4"></video>
-                                    <?php else: ?>
-                                        <img src="<?= htmlspecialchars($report['media_path']) ?>" alt="Crime media" style="max-width:160px; max-height:120px;">
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <span>No media</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= $report['is_reviewed'] ? 'Yes' : 'No' ?></td>
-                            <td><?= htmlspecialchars($report['created_at']) ?></td>
-                            <td>
-                                <a class="button" href="manage_my_submissions.php?edit_type=report&id=<?= $report['id'] ?>">Edit</a>
-                                <form method="post" action="manage_my_submissions.php" style="display:inline-block; margin-left:8px;">
-                                    <input type="hidden" name="report_id" value="<?= $report['id'] ?>">
-                                    <button class="button" type="submit" name="delete_report" value="1" style="background:#dc2626;">Delete</button>
+                            <td style="font-weight: 700;"><?= htmlspecialchars($r['category_name']) ?> <small class="text-muted" style="display:block; font-weight:400;"><?= $r['is_anonymous'] ? '(Anonymous)' : '' ?></small></td>
+                            <td><span class="badge <?= $r['is_reviewed'] ? 'success' : 'primary' ?>"><?= $r['is_reviewed'] ? 'Reviewed' : 'Pending' ?></span></td>
+                            <td class="text-muted"><?= date('M d, Y', strtotime($r['created_at'])) ?></td>
+                            <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="manage_my_submissions.php?edit_type=report&id=<?= $r['id'] ?>" class="button outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--border);">Edit</a>
+                                <form method="post" onsubmit="return confirm('Delete this report?');">
+                                    <input type="hidden" name="report_id" value="<?= $r['id'] ?>">
+                                    <button type="submit" name="delete_report" class="button" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); box-shadow: none;">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -303,7 +326,12 @@ $reports = $mysqli->query("SELECT crime_reports.id, crime_categories.name AS cat
             </table>
         </div>
     <?php else: ?>
-        <p>No crime reports submitted yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <h3>No crime reports</h3>
+            <p>You haven't reported any incidents. Help keep our constituency safe by reporting crimes.</p>
+        </div>
     <?php endif; ?>
-</section>
+</div>
+
 <?php include 'includes/footer.php'; ?>

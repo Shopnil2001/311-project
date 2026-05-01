@@ -59,57 +59,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <?php include 'includes/header.php'; ?>
-<section class="card">
-    <h1>Register</h1>
-    <?php if ($error): ?>
-        <div class="alert"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    <?php if ($success): ?>
-        <div class="alert" style="background:#d1fae5;color:#064e3b;"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
-    <form method="post" action="register.php" id="register-form">
-        <label for="role">Register as</label>
-        <select id="role" name="role">
-            <option value="citizen">Citizen</option>
-            <option value="mp">Member of Parliament</option>
-        </select>
+<div class="auth-wrapper">
+    <section class="card">
+        <h1>Create Account</h1>
+        <!-- <p class="text-center text-muted" style="margin-top:24px;margin-bottom:32px;">Join the Constituency Hub</p> -->
 
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" required>
+        <?php if ($error): ?>
+            <div class="alert"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
-        <label for="email">Email address</label>
-        <input type="email" id="email" name="email" required>
+        <form method="post" action="register.php" id="register-form">
+            <div class="form-group">
+                <label for="role">Register as</label>
+                <select id="role" name="role">
+                    <option value="citizen">Citizen</option>
+                    <option value="mp">Member of Parliament</option>
+                </select>
+            </div>
 
-        <label for="phone">Phone / Contact</label>
-        <input type="text" id="phone" name="phone">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="John Doe" required>
+            </div>
 
-        <div id="citizen-fields">
-            <label for="sector_id">Your Sector</label>
-            <select id="sector_id" name="sector_id">
-                <option value="">Select a sector</option>
-                <?php foreach ($sectors as $sector): ?>
-                    <option value="<?= $sector['id'] ?>"><?= htmlspecialchars($sector['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
 
-        <div id="mp-fields" style="display:none;">
-            <label for="constituency_id">Your Constituency</label>
-            <select id="constituency_id" name="constituency_id">
-                <option value="">Select a constituency</option>
-                <?php foreach ($constituencies as $constituency): ?>
-                    <option value="<?= $constituency['id'] ?>"><?= htmlspecialchars($constituency['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <p style="font-size:0.95rem;color:#555;margin-top:-10px;">MP registration will be reviewed by the super admin before the account is activated.</p>
-        </div>
+            <div class="form-group">
+                <label for="phone">Phone / Contact</label>
+                <input type="text" id="phone" name="phone" placeholder="+880 1311-1100-00">
+            </div>
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+            <div id="citizen-fields" class="form-group">
+                <label for="sector_id">Your Sector</label>
+                <select id="sector_id" name="sector_id">
+                    <option value="">Select a sector</option>
+                    <?php foreach ($sectors as $sector): ?>
+                        <option value="<?= $sector['id'] ?>"><?= htmlspecialchars($sector['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <button type="submit">Register</button>
-    </form>
-</section>
+            <div id="mp-fields" class="form-group" style="display:none;">
+                <label for="constituency_id">Your Constituency</label>
+                <select id="constituency_id" name="constituency_id">
+                    <option value="">Select a constituency</option>
+                    <?php foreach ($constituencies as $constituency): ?>
+                        <option value="<?= $constituency['id'] ?>"><?= htmlspecialchars($constituency['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="text-sm text-muted mt-2">MP registration will be reviewed by the super admin before the
+                    account is activated.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" style="margin-top: 8px;">Register Account</button>
+
+            <p class="text-center mt-4 text-sm text-muted">
+                Already have an account? <a href="login.php" class="link">Login here</a>
+            </p>
+        </form>
+    </section>
+</div>
 <script>
     const roleSelect = document.getElementById('role');
     const citizenFields = document.getElementById('citizen-fields');
@@ -118,11 +138,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function updateRoleFields() {
         if (roleSelect.value === 'mp') {
             citizenFields.style.display = 'none';
-            mpFields.style.display = 'block';
+            mpFields.style.display = 'flex';
             document.getElementById('sector_id').required = false;
             document.getElementById('constituency_id').required = true;
         } else {
-            citizenFields.style.display = 'block';
+            citizenFields.style.display = 'flex';
             mpFields.style.display = 'none';
             document.getElementById('sector_id').required = true;
             document.getElementById('constituency_id').required = false;
@@ -131,3 +151,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     roleSelect.addEventListener('change', updateRoleFields);
     updateRoleFields();
 </script>
+<?php include 'includes/footer.php'; ?>

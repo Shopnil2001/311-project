@@ -49,29 +49,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <?php include 'includes/header.php'; ?>
-<section class="card">
-    <h1>Login</h1>
-    <?php if (isset($_GET['registered'])): ?>
-        <div class="alert" style="background:#d1fae5;color:#064e3b;">Registration complete. You may now log in.</div>
-    <?php endif; ?>
-    <?php if ($error): ?>
-        <div class="alert"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    <form method="post" action="login.php">
-        <label for="role">Login as</label>
-        <select id="role" name="role">
-            <option value="citizen">Citizen</option>
-            <option value="mp">Member of Parliament</option>
-            <option value="admin">Super Admin</option>
-        </select>
+<div class="auth-wrapper">
+    <section class="card">
+        <h1>Welcome Back</h1>
+        <!-- <p class="text-center text-muted" style="margin-top:-24px;margin-bottom:32px;">Please sign in to your account</p> -->
 
-        <label for="email">Email address</label>
-        <input type="email" id="email" name="email" required>
+        <?php if (isset($_GET['registered'])): ?>
+            <div class="alert success">Registration complete. You may now log in.</div>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="alert"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+        <form method="post" action="login.php">
+            <div class="form-group">
+                <label for="role">Login as</label>
+                <select id="role" name="role">
+                    <option value="citizen">Citizen</option>
+                    <option value="mp">Member of Parliament</option>
+                    <option value="admin">Super Admin</option>
+                </select>
+            </div>
 
-        <button type="submit">Login</button>
-    </form>
-</section>
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" style="margin-top: 8px;">Login to Account</button>
+
+            <p class="text-center mt-4 text-sm text-muted">
+                Don't have an account? <a href="register.php" class="link">Register here</a>
+            </p>
+        </form>
+    </section>
+</div>
 <?php include 'includes/footer.php'; ?>
